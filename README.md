@@ -54,7 +54,8 @@ python3 gdelt_downloader.py --limit 3
 
 ## データの中身の確認方法
 
-- **[自動実行の設定](docs/automation.md)**: 毎日決まった時間に自動的に差分を取得する方法。
+- **[Dockerで自動実行](docs/docker.md)**: OSを問わず、コンテナを使って一発で自動化環境を構築する方法。
+- **[スクリプトで自動実行](docs/automation.md)**: macOS/Linux の cron を使って自動化する方法。
 - **SQL (DuckDB) を使う**: DuckDBを使うと、保存した Parquet ファイルに対して直接 SQL を実行できます。
 
 ```bash

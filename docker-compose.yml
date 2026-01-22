@@ -1,0 +1,9 @@
+services:
+  gdelt-downloader:
+    build: .
+    container_name: gdelt-downloader
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+    # If you want to change the run time or arguments, you can override the command
+    # command: python scheduler.py
