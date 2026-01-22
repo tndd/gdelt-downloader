@@ -122,17 +122,49 @@ def download_and_convert(row, target_dir):
 
 def main():
     parser = argparse.ArgumentParser(description="GDELT 2.0 Downloader")
-    parser.add_argument("--date", type=str, help="Date in YYYYMMDD format (default: today)", default=datetime.datetime.now().strftime("%Y%m%d"))
+    parser.add_argument("--date", type=str, help="Date in YYYYMMDD format (default: today)", default=None)
+    parser.add_argument("--start-date", type=str, help="Start date in YYYYMMDD format for range download")
+    parser.add_argument("--end-date", type=str, help="End date in YYYYMMDD format for range download")
+    parser.add_argument("--full-history", action="store_true", help="Download ALL available historical data (WARNING: Huge size)")
     parser.add_argument("--type", type=str, choices=["all", "events", "mentions", "gkg"], default="all", help="Data type to download")
     parser.add_argument("--limit", type=int, default=None, help="Limit number of files to download (for testing)")
+    parser.add_argument("--workers", type=int, default=8, help="Number of parallel worker threads")
     
     args = parser.parse_args()
     
     # 1. Fetch master list
     master_df = fetch_master_list()
     
-    # 2. Filter by date
-    filtered_df = master_df.filter(pl.col("timestamp_str").str.starts_with(args.date))
+    # 2. Filter by date/range
+    if args.full_history:
+        print("!!! WARNING: You have selected to download the ENTIRE GDELT history. !!!")
+        print("This involves hundreds of thousands of files and terabytes of data.")
+        print("Ensure you have sufficient disk space and bandwidth.")
+        # Force high concurrency for full history unless manually specified higher? 
+        # Requirement: "If full-history is specified, workers should be fixed at 16".
+        # We will override args.workers logic later or just set it here.
+        args.workers = 16 
+        print(f"Full history mode: Workers set to {args.workers}")
+        
+        filtered_df = master_df
+        print("Processing full history...")
+        
+    elif args.start_date and args.end_date:
+        start_ts = args.start_date + "000000"
+        end_ts = args.end_date + "235959"
+        
+        # Proper string comparison for timestamp range
+        filtered_df = master_df.filter(
+            (pl.col("timestamp_str") >= start_ts) & 
+            (pl.col("timestamp_str") <= end_ts)
+        )
+        print(f"Filtering for range: {args.start_date} to {args.end_date}")
+        
+    else:
+        # Default to single date (args.date or today)
+        target_date = args.date if args.date else datetime.datetime.now().strftime("%Y%m%d")
+        filtered_df = master_df.filter(pl.col("timestamp_str").str.starts_with(target_date))
+        print(f"Filtering for single date: {target_date}")
     
     # 3. Filter by type
     if args.type != "all":
@@ -142,7 +174,7 @@ def main():
     if args.limit:
         filtered_df = filtered_df.head(args.limit)
     
-    print(f"Found {len(filtered_df)} files to process for date {args.date}")
+    print(f"Found {len(filtered_df)} files to process.")
     
     if len(filtered_df) == 0:
         print("No files found for the given criteria.")
@@ -150,7 +182,11 @@ def main():
 
     # 4. Download and convert in parallel
     rows = filtered_df.to_dicts()
-    with ThreadPoolExecutor(max_workers=8) as executor:
+    
+    # Adjust workers based on task size if needed, but respect user flag
+    workers = args.workers
+        
+    with ThreadPoolExecutor(max_workers=workers) as executor:
         list(tqdm(executor.map(lambda r: download_and_convert(r, DATA_DIR), rows), total=len(rows), desc="Downloading"))
 
 if __name__ == "__main__":

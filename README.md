@@ -42,6 +42,14 @@ python3 gdelt_downloader.py --date 20260121
 # 特定のデータ種別のみ取得 (events, mentions, gkg)
 python3 gdelt_downloader.py --type events
 
+# 【NEW】期間を指定して一括取得
+# 2024年1月1日から1月31日までを取得（--workers で並列数指定可）
+python3 gdelt_downloader.py --start-date 20240101 --end-date 20240131 --workers 16
+
+# 【WARNING】全期間のデータを取得（テラバイト級のサイズになります）
+# ※このモードでは自動的に並列数が 16 に設定されます
+python3 gdelt_downloader.py --full-history
+
 # 動作テスト（最初の3件のみ取得）
 python3 gdelt_downloader.py --limit 3
 ```
