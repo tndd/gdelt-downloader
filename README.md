@@ -60,23 +60,18 @@ python3 gdelt_downloader.py --limit 3
 - `data/mentions/`: 報道の言及データ
 - `data/gkg/`: ナレッジグラフ（詳細文脈）データ
 
-## データの中身の確認方法
+## データの活用方法 (DuckDB / Polars)
 
-- **[Dockerで自動実行](docs/docker.md)**: OSを問わず、コンテナを使って一発で自動化環境を構築する方法。
-- **[スクリプトで自動実行](docs/automation.md)**: macOS/Linux の cron を使って自動化する方法。
-- **SQL (DuckDB) を使う**: DuckDBを使うと、保存した Parquet ファイルに対して直接 SQL を実行できます。
+保存された Parquet ファイルは、そのまま SQL や Python で超高速に分析できます。
+詳細は **[データ分析・活用ガイド](docs/analysis.md)** をご覧ください。
 
+### クイック分析例:
 ```bash
-duckdb
-# 実行例
-SELECT * FROM 'data/gkg/*.parquet' LIMIT 10;
-```
+# Python (Polars) で国別集計を実行
+python3 analyze_sample.py
 
-### Python (Polars) を使う
-```python
-import polars as pl
-df = pl.read_parquet("data/events/xxxx.parquet")
-print(df.head())
+# DuckDB (SQL) で全件の合計を算出
+duckdb -c "SELECT COUNT(*) FROM 'data/events/*.parquet';"
 ```
 
 ## 各データセットの概要
