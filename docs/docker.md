@@ -10,10 +10,20 @@ Docker を使用すると、OSごとの違い（cronやパス設定など）を�
 
 ### 1. 起動（バックグラウンド実行）
 
-プロジェクトのルートディレクトリで以下のコマンドを実行します。
+以下のコマンドで、毎日午前2時に自動実行するスケジューラーが起動します。
 
 ```bash
 docker-compose up -d --build
+```
+    
+### 【重要】手動で特定の量のデータをダウンロードする場合
+
+（例：全量は多すぎるので、直近のデータ 10GB程度分だけ欲しい場合）
+1ファイル圧縮時2MB計算で5000ファイル取得すると、解凍・Parquet変換後でおおよそ数GB〜10GB程度になります。
+
+```bash
+# --limit 5000 を指定して実行
+docker-compose run gdelt-downloader python gdelt_downloader.py --full-history --limit 5000
 ```
 
 これだけで完了です。
