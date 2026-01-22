@@ -13,7 +13,7 @@ DATA_DIR = "data"
 
 # Schema Definitions
 SCHEMAS = {
-    "export": [
+    "events": [
         "GLOBALEVENTID", "SQLDATE", "MonthYear", "Year", "FractionDate", "Actor1Code", "Actor1Name",
         "Actor1CountryCode", "Actor1KnownGroupCode", "Actor1EthnicCode", "Actor1Religion1Code", "Actor1Religion2Code",
         "Actor1Type1Code", "Actor1Type2Code", "Actor1Type3Code", "Actor2Code", "Actor2Name", "Actor2CountryCode",
@@ -59,7 +59,7 @@ def fetch_master_list():
     ])
     df = df.with_columns([
         pl.col("filename").str.extract(r"(\d{14})").alias("timestamp_str"),
-        pl.col("filename").str.contains("export").alias("is_export"),
+        pl.col("filename").str.contains("export").alias("is_events"),
         pl.col("filename").str.contains("mentions").alias("is_mentions"),
         pl.col("filename").str.contains("gkg").alias("is_gkg")
     ])
@@ -73,7 +73,7 @@ def download_and_convert(row, target_dir):
     timestamp = row['timestamp_str']
     
     data_type = "unknown"
-    if row['is_export']: data_type = "export"
+    if row['is_events']: data_type = "events"
     elif row['is_mentions']: data_type = "mentions"
     elif row['is_gkg']: data_type = "gkg"
     
@@ -123,7 +123,7 @@ def download_and_convert(row, target_dir):
 def main():
     parser = argparse.ArgumentParser(description="GDELT 2.0 Downloader")
     parser.add_argument("--date", type=str, help="Date in YYYYMMDD format (default: today)", default=datetime.datetime.now().strftime("%Y%m%d"))
-    parser.add_argument("--type", type=str, choices=["all", "export", "mentions", "gkg"], default="all", help="Data type to download")
+    parser.add_argument("--type", type=str, choices=["all", "events", "mentions", "gkg"], default="all", help="Data type to download")
     parser.add_argument("--limit", type=int, default=None, help="Limit number of files to download (for testing)")
     
     args = parser.parse_args()
@@ -136,6 +136,7 @@ def main():
     
     # 3. Filter by type
     if args.type != "all":
+        # Argument 'events' matches column 'is_events', etc.
         filtered_df = filtered_df.filter(pl.col(f"is_{args.type}"))
     
     if args.limit:
