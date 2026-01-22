@@ -14,8 +14,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY gdelt_downloader.py .
 COPY scheduler.py .
-COPY run_daily.sh . 
-# Note: run_daily.sh might not be needed inside Docker if we use scheduler.py explicitly
+COPY automation.sh . 
+# Note: automation.sh might not be needed inside Docker if we use scheduler.py explicitly
 
 # Create data directory
 RUN mkdir -p data/events data/mentions data/gkg
