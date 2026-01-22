@@ -12,13 +12,11 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY gdelt_downloader.py .
-COPY scheduler.py .
-COPY automation.sh . 
-# Note: automation.sh might not be needed inside Docker if we use scheduler.py explicitly
+# Copy application code
+COPY . .
 
 # Create data directory
 RUN mkdir -p data/events data/mentions data/gkg
 
 # Default command runs the scheduler
-CMD ["python", "scheduler.py"]
+CMD ["python", "src/scheduler.py"]

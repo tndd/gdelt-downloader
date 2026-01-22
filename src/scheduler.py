@@ -2,15 +2,20 @@ import schedule
 import time
 import subprocess
 import datetime
+import os
 import sys
 
 def job():
     print(f"[{datetime.datetime.now()}] Starting scheduled job...")
     try:
         # Run the downloader using subprocess
+        # Get the directory where scheduler.py is located
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        downloader_path = os.path.join(script_dir, "gdelt_downloader.py")
+        
         # Using sys.executable ensures we use the same python interpreter
         result = subprocess.run(
-            [sys.executable, "gdelt_downloader.py", "--type", "events"],
+            [sys.executable, downloader_path, "--type", "events"],
             capture_output=True,
             text=True
         )

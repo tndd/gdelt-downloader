@@ -12,15 +12,11 @@ DATE=$(date +%Y%m%d)
 # ログディレクトリの作成
 mkdir -p "$LOG_DIR"
 
-# 1. プロジェクトディレクトリへ移動
-cd "$PROJECT_DIR" || exit
-
-# 2. 仮想環境の有効化
-source venv/bin/activate
-
-# 3. ダウンローダーの実行
-# 引数なしで実行するとデフォルトで「今日」のデータが対象になります
+# 3. ダウンローダーの実行 (Docker経由)
 echo "[$(date)] Starting GDELT download for $DATE..." >> "$LOG_DIR/download_$DATE.log"
-python3 gdelt_downloader.py >> "$LOG_DIR/download_$DATE.log" 2>&1
+
+# make download を実行
+# ※ PATH等の問題で make が見つからない場合はフルパス指定か docker-compose を直接呼ぶように修正してください
+/usr/bin/make download >> "$LOG_DIR/download_$DATE.log" 2>&1
 
 echo "[$(date)] Finished." >> "$LOG_DIR/download_$DATE.log"
